@@ -141,14 +141,12 @@ body {
     background: rgba(255,255,255,0.05);
   }
 
-  /* Typing characters — CSS transitions for smooth color changes */
+  /* Typing characters — instant color, no delay */
   .char-pending {
     color: var(--subtext);
-    transition: color 0.08s ease, opacity 0.08s ease;
   }
   .char-correct {
     color: var(--text);
-    transition: color 0.08s ease, opacity 0.08s ease;
   }
   .char-error {
     color: var(--error);
@@ -156,12 +154,10 @@ body {
     text-decoration-color: var(--error);
     text-underline-offset: 3px;
     text-decoration-thickness: 1px;
-    transition: color 0.08s ease;
   }
   .char-extra {
     color: var(--error);
     opacity: 0.6;
-    transition: color 0.08s ease, opacity 0.08s ease;
   }
 
   .char-cursor {
@@ -177,9 +173,6 @@ body {
     background: var(--primary);
     border-radius: 2px;
     animation: cursorBlink 1s ease-in-out infinite;
-    transition: left 0.06s cubic-bezier(0.4, 0, 0.2, 1),
-                top 0.06s cubic-bezier(0.4, 0, 0.2, 1),
-                background 0.15s ease;
   }
 
   /* Stats */

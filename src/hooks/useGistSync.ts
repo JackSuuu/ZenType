@@ -3,8 +3,8 @@ import { useAuthStore } from '../stores/authStore'
 import { useHistoryStore } from '../stores/historyStore'
 import type { TestResult } from '../types'
 
-const GIST_FILENAME = 'zentype-history.json'
-const GIST_DESCRIPTION = 'ZenType typing test history'
+const GIST_FILENAME = 'muontype-history.json'
+const GIST_DESCRIPTION = 'MuonType typing test history'
 
 interface GistFile {
   filename: string

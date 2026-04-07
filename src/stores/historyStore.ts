@@ -31,6 +31,6 @@ export const useHistoryStore = create<HistoryState>()(
         return Math.round(slice.reduce((sum, r) => sum + r.wpm, 0) / slice.length)
       },
     }),
-    { name: 'zentype-history' }
+    { name: 'muontype-history' }
   )
 )

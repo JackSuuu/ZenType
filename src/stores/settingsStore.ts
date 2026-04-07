@@ -53,6 +53,6 @@ export const useSettingsStore = create<SettingsState>()(
       setCaretStyle: (caretStyle) => set({ caretStyle }),
       toggleSmoothCaret: () => set((s) => ({ smoothCaret: !s.smoothCaret })),
     }),
-    { name: 'zentype-settings' }
+    { name: 'muontype-settings' }
   )
 )

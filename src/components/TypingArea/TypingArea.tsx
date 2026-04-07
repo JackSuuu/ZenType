@@ -1,5 +1,5 @@
 import React, { useMemo, useRef } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useSettingsStore } from '../../stores/settingsStore'
 import type { TypingViewState } from '../../hooks/useTypingEngine'
 import clsx from 'clsx'
@@ -19,7 +19,7 @@ const FONT_SIZE_MAP = {
 const LINE_HEIGHT = 'leading-[2.6em]'
 const WORDS_PER_LINE = 9
 
-// Single word rendering — memoized
+// Single word rendering — memoized so unchanged words never re-render
 const WordSpan = React.memo(function WordSpan({
   word,
   isCurrentWord,
@@ -109,12 +109,12 @@ export const TypingArea: React.FC<TypingAreaProps> = ({ viewState, testState }) 
       )}
       style={{ color: 'var(--subtext)' }}
     >
-      {/* Use currentLine as key so the word block animates in when lines scroll */}
+      {/* Use currentLine as key so the word block animates when lines scroll */}
       <motion.div
         key={Math.max(0, currentLine - 1)}
-        initial={lineChanged ? { opacity: 0.6, y: 6 } : false}
+        initial={lineChanged ? { opacity: 0.7, y: 4 } : false}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.18, ease: 'easeOut' }}
+        transition={{ duration: 0.1, ease: 'easeOut' }}
         className="flex flex-wrap gap-x-[0.6em] gap-y-0 overflow-hidden"
         style={{ maxHeight: `calc(2.6em * ${VISIBLE_LINES})` }}
       >
@@ -137,24 +137,16 @@ export const TypingArea: React.FC<TypingAreaProps> = ({ viewState, testState }) 
       </motion.div>
 
       {/* Idle hint */}
-      <AnimatePresence>
-        {testState === 'idle' && words.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+      {testState === 'idle' && words.length > 0 && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <span
+            className="font-mono text-sm"
+            style={{ color: 'var(--subtext)', opacity: 0.4 }}
           >
-            <span
-              className="font-mono text-sm"
-              style={{ color: 'var(--subtext)', opacity: 0.4 }}
-            >
-              start typing...
-            </span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            start typing...
+          </span>
+        </div>
+      )}
     </div>
   )
 }

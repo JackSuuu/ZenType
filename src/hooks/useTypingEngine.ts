@@ -8,6 +8,7 @@ export interface TypingViewState {
   words: WordData[]
   currentWordIndex: number
   typedWord: string
+  renderTick: number  // increment to signal TypingArea to re-read words ref
 }
 
 export function useTypingEngine() {
@@ -27,6 +28,7 @@ export function useTypingEngine() {
     words: [],
     currentWordIndex: 0,
     typedWord: '',
+    renderTick: 0,
   })
 
   // Sync when store initialises / resets
@@ -51,15 +53,22 @@ export function useTypingEngine() {
         words: wordsRef.current,
         currentWordIndex: 0,
         typedWord: '',
+        renderTick: 0,
       })
     }
   }, [storeWords, storeTestState])
 
+  // flushView: pass words by reference (same array object) so React.memo on
+  // unchanged WordSpan siblings can bail out via referential equality.
+  // Only currentWordIndex, typedWord, and renderTick change per keystroke.
+  const tickRef = useRef(0)
   const flushView = useCallback(() => {
+    tickRef.current += 1
     setViewState({
       words: wordsRef.current,
       currentWordIndex: currentWordIndexRef.current,
       typedWord: typedWordRef.current,
+      renderTick: tickRef.current,
     })
   }, [])
 
@@ -110,7 +119,7 @@ export function useTypingEngine() {
 
         play(wordCorrect ? 'space' : 'error')
 
-        // Finalise word chars, count correct/incorrect for this word
+        // Finalise word chars
         let wordCorrectChars = 0
         let wordIncorrectChars = 0
         word.chars = word.original.split('').map((ch, i) => {
@@ -124,10 +133,8 @@ export function useTypingEngine() {
         word.isCompleted = true
         word.hasError = !wordCorrect
 
-        // Extra chars beyond word length
         const wordExtraChars = Math.max(0, typed.length - word.original.length)
 
-        // Update local stat refs
         correctCharsRef.current += wordCorrectChars
         incorrectCharsRef.current += wordIncorrectChars
         extraCharsRef.current += wordExtraChars
@@ -140,7 +147,6 @@ export function useTypingEngine() {
         const isLastWord = nextIndex >= words.length
         const mode = store.mode
 
-        // Finish test in words/quote mode when last word is done
         if ((mode === 'words' || mode === 'quote') && isLastWord) {
           store.finishTest(
             correctCharsRef.current,
@@ -152,7 +158,6 @@ export function useTypingEngine() {
           return
         }
 
-        // Sync cumulative stats to store on word boundary (for live WPM/acc display)
         store.recordWord(
           correctCharsRef.current,
           incorrectCharsRef.current,
@@ -162,7 +167,7 @@ export function useTypingEngine() {
         return
       }
 
-      // Regular character — only update local refs, NO store call
+      // Regular character
       const idx = currentWordIndexRef.current
       const words = wordsRef.current
       const word = words[idx]
@@ -177,7 +182,6 @@ export function useTypingEngine() {
 
       play(isCorrect ? 'keypress' : 'error')
 
-      // Update char statuses in-place
       word.chars = word.original.split('').map((ch, i) => ({
         char: ch,
         status: i < newTyped.length
@@ -187,7 +191,6 @@ export function useTypingEngine() {
       }))
       word.hasError = word.chars.some(c => c.status === 'error')
 
-      // Track in local ref only — no store.set() per keystroke
       keystrokesRef.current.push({ key: e.key, correct: isCorrect, timestamp: Date.now() })
 
       flushView()
@@ -201,7 +204,6 @@ export function useTypingEngine() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [handleKeyDown])
 
-  // Play complete sound on finish
   useEffect(() => {
     if (storeTestState === 'finished') {
       play('complete')

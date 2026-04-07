@@ -37,7 +37,7 @@ export const useAuthStore = create<AuthState>()(
       logout: () => set({ token: null, user: null, gistId: null }),
     }),
     {
-      name: 'zentype-auth',
+      name: 'muontype-auth',
       // Only persist token, user, and gistId — not transient loading state
       partialize: (state) => ({
         token: state.token,

@@ -88,7 +88,7 @@ const AppContent: React.FC = () => {
       {/* Footer */}
       <footer className="py-4 text-center">
         <span className="font-mono text-xs" style={{ color: 'var(--subtext)', opacity: 0.3 }}>
-          zentype · 禅타이핑 · made with
+          zentype · 無音 · made with
           <span className="mx-1" style={{ color: 'var(--primary)' }}>茶</span>
           and code
         </span>

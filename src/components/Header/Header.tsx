@@ -67,12 +67,12 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
           <span className="font-serif text-2xl tracking-wide font-medium"
             style={{ color: 'var(--text)' }}
           >
-            ZenType
+            MuonType
           </span>
           <span className="font-serif text-sm opacity-40 hidden sm:block"
             style={{ color: 'var(--secondary)' }}
           >
-            禅
+            無音
           </span>
         </Link>
 
