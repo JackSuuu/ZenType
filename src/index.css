@@ -141,12 +141,15 @@ body {
     background: rgba(255,255,255,0.05);
   }
 
-  /* Typing characters — instant color, no delay */
+  /* Typing characters — very short fade so color doesn't feel harsh,
+     but short enough (40ms) that it never lags behind fast typing */
   .char-pending {
     color: var(--subtext);
+    transition: color 0.04s ease;
   }
   .char-correct {
     color: var(--text);
+    transition: color 0.04s ease;
   }
   .char-error {
     color: var(--error);
@@ -154,6 +157,7 @@ body {
     text-decoration-color: var(--error);
     text-underline-offset: 3px;
     text-decoration-thickness: 1px;
+    transition: color 0.04s ease;
   }
   .char-extra {
     color: var(--error);
@@ -164,6 +168,25 @@ body {
     position: relative;
   }
   .char-cursor::before {
+    content: '';
+    position: absolute;
+    left: -1px;
+    top: 8%;
+    bottom: 8%;
+    width: 2px;
+    background: var(--primary);
+    border-radius: 2px;
+    animation: cursorBlink 1s ease-in-out infinite;
+  }
+
+  /* End-of-word cursor beam — opacity transition so it fades out
+     instead of popping, preventing the word-shift visual artifact */
+  .char-cursor-beam {
+    position: relative;
+    display: inline;
+    transition: opacity 0.06s ease;
+  }
+  .char-cursor-beam::before {
     content: '';
     position: absolute;
     left: -1px;

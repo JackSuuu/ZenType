@@ -33,6 +33,10 @@ const WordSpan = React.memo(function WordSpan({
   typedWord: string
   blindMode: boolean
 }) {
+  // Extra chars typed beyond word length — always render a fixed-width
+  // placeholder so the span width never changes when extra chars appear/disappear
+  const extraTyped = isCurrentWord ? typedWord.slice(word.original.length) : ''
+
   return (
     <span className="relative inline-block">
       {word.chars.map((charData, charIdx) => {
@@ -57,17 +61,19 @@ const WordSpan = React.memo(function WordSpan({
         )
       })}
 
-      {/* Extra typed characters */}
-      {isCurrentWord && typedWord.length > word.original.length && (
-        <span className="char-extra">
-          {typedWord.slice(word.original.length)}
-        </span>
+      {/* Extra typed characters — only visible when isCurrentWord */}
+      {extraTyped && (
+        <span className="char-extra">{extraTyped}</span>
       )}
 
-      {/* Cursor at end of word */}
-      {isCurrentWord && typedWord.length === word.original.length && (
-        <span className="char-cursor" style={{ width: 0 }}>&nbsp;</span>
-      )}
+      {/* Cursor beam — always in DOM for current word, fades out on transition */}
+      <span
+        className="char-cursor-beam"
+        style={{
+          opacity: isCurrentWord && typedWord.length >= word.original.length ? 1 : 0,
+          width: 0,
+        }}
+      />
     </span>
   )
 })
