@@ -1,14 +1,12 @@
-# ZenType
+# MuonType · 無音
 
-A typing speed test web app inspired by the aesthetics of Japanese ukiyo-e art and tea room culture. Built with React, TypeScript, and Vite.
+A minimalist typing speed test with a Japanese aesthetic. Silent, focused, fast.
 
 ![React](https://img.shields.io/badge/React-18-blue?logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
 ![Vite](https://img.shields.io/badge/Vite-4-purple?logo=vite)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-blue?logo=tailwindcss)
 ![License](https://img.shields.io/badge/License-MIT-green)
-
-![](./zentype.png)
 
 ## Features
 
@@ -35,16 +33,19 @@ A typing speed test web app inspired by the aesthetics of Japanese ukiyo-e art a
 | Yuki | 雪月 | Snow White |
 
 **Sound Profiles** (Web Audio API, no audio files)
-- Wood (bamboo), Mechanical, Soft, Typewriter, Silent
+- Wood, Mechanical, Soft, Typewriter, Silent
 
 **Word Lists**
 - English 200, English 1k, Code keywords, Japanese romaji
+
+**GitHub Sync**
+- Login with GitHub to sync test history across devices via a private Gist
 
 **Other**
 - Sakura petal particle effect on test completion
 - Seigaiha wave pattern background
 - Blind mode toggle
-- All data persisted to LocalStorage (no backend required)
+- All settings persisted to LocalStorage
 
 ## Tech Stack
 
@@ -53,12 +54,13 @@ A typing speed test web app inspired by the aesthetics of Japanese ukiyo-e art a
 | Framework | React 18 + TypeScript |
 | Build | Vite 4 |
 | Styling | Tailwind CSS 3, CSS custom properties |
-| State | Zustand (3 stores: typing, settings, history) |
+| State | Zustand (typing, settings, history, auth) |
 | Animation | Framer Motion |
 | Charts | Recharts |
 | Sound | Web Audio API (procedural synthesis) |
 | Routing | React Router v6 |
-| Storage | LocalStorage |
+| Storage | LocalStorage + GitHub Gist (optional) |
+| Auth | GitHub OAuth via Vercel serverless function |
 
 ## Getting Started
 
@@ -82,12 +84,25 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173).
 
+For local testing of the GitHub OAuth API, run `vercel dev` in a separate terminal (requires the [Vercel CLI](https://vercel.com/docs/cli)) and set a `.env` file based on `.env.example`.
+
 ### Build
 
 ```bash
 npm run build
 npm run preview
 ```
+
+## GitHub OAuth Setup
+
+1. Create a GitHub OAuth App at [github.com/settings/developers](https://github.com/settings/developers)
+   - Authorization callback URL: your deployment URL (e.g. `https://your-app.vercel.app`)
+2. Add these environment variables in Vercel Project Settings:
+   ```
+   GITHUB_CLIENT_ID=...
+   GITHUB_CLIENT_SECRET=...
+   ```
+3. Redeploy
 
 ## Project Structure
 
@@ -98,37 +113,43 @@ src/
 ├── stores/
 │   ├── typingStore.ts          # Test state machine, WPM calc, results
 │   ├── settingsStore.ts        # User preferences (persisted)
-│   └── historyStore.ts         # Test history (persisted, last 100)
+│   ├── historyStore.ts         # Test history (persisted, last 100)
+│   └── authStore.ts            # GitHub auth token + user (persisted)
 ├── hooks/
 │   ├── useTypingEngine.ts      # Core typing logic (useRef-based perf)
 │   ├── useTimer.ts             # 1s interval timer
 │   ├── useSound.ts             # Web Audio API sound synthesis
-│   └── useTheme.ts             # CSS variable theme switching
+│   ├── useTheme.ts             # CSS variable theme switching
+│   └── useGistSync.ts          # GitHub Gist read/write sync
 ├── components/
-│   ├── Header/Header.tsx       # Navigation, theme dots, PB badge
+│   ├── Header/Header.tsx       # Navigation, theme dots, PB badge, login
 │   ├── TypingArea/TypingArea.tsx   # Windowed word rendering, cursor
 │   ├── Stats/StatsPanel.tsx    # Live WPM / accuracy / timer
 │   ├── Results/Results.tsx     # WPM chart, error heatmap, stats
 │   ├── Settings/SettingsPanel.tsx  # Theme, sound, display settings
 │   └── ui/                     # Modal, Button, Tabs, BackgroundPattern
-└── pages/
-    ├── Home.tsx                # Typing test page
-    └── History.tsx             # Past results and progress charts
+├── pages/
+│   ├── Home.tsx                # Typing test page
+│   └── History.tsx             # Past results and progress charts
+└── api/
+    └── auth/
+        ├── github.ts           # Vercel function: OAuth code exchange
+        └── client-id.ts        # Vercel function: expose client_id to browser
 ```
 
 ## Architecture Notes
 
 ### Performance
 
-The typing engine (`useTypingEngine`) uses `useRef` for all per-keystroke state to avoid React re-renders on every keypress. Zustand store is only updated on **word boundaries** (space key), not per character. The `TypingArea` uses windowed rendering (3 visible lines) and memoized word components.
+The typing engine (`useTypingEngine`) uses `useRef` for all per-keystroke state. Zustand is only called on word boundaries (space key), never per character. `TypingArea` uses windowed rendering (3 visible lines) and `React.memo` on word components so only the current word re-renders per keystroke. Character color changes are instant (no CSS transitions).
 
 ### Sound System
 
-All sounds are generated procedurally via the Web Audio API using oscillator nodes and noise buffers. No audio files are loaded. Four distinct profiles shape the oscillator parameters to produce wood, mechanical, soft, and typewriter textures.
+All sounds are generated procedurally via the Web Audio API. No audio files are loaded. Four profiles shape oscillator parameters to produce wood, mechanical, soft, and typewriter textures.
 
 ### Theme System
 
-Themes are driven by CSS custom properties (`--bg`, `--primary`, `--secondary`, etc.) set on `<html>` via the `data-theme` attribute. Tailwind utilities reference these variables. Switching themes triggers a smooth 0.4s CSS transition.
+Themes are CSS custom properties (`--bg`, `--primary`, etc.) set on `<html>` via the `data-theme` attribute. Switching triggers a 0.4s CSS transition on `body`.
 
 ## Keyboard Shortcuts
 

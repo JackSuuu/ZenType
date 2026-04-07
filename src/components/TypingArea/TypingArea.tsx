@@ -34,15 +34,7 @@ const WordSpan = React.memo(function WordSpan({
   blindMode: boolean
 }) {
   return (
-    <span
-      className={clsx('relative inline-block', isCurrentWord && 'rounded')}
-      style={isCurrentWord ? {
-        background: 'rgba(255,255,255,0.03)',
-        outline: '1px solid var(--border)',
-        paddingLeft: '1px',
-        paddingRight: '1px',
-      } : undefined}
-    >
+    <span className="relative inline-block">
       {word.chars.map((charData, charIdx) => {
         const isCurrentChar = isCurrentWord && charIdx === typedWord.length
 
