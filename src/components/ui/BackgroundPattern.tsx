@@ -3,47 +3,40 @@ import React from 'react'
 export const BackgroundPattern: React.FC = () => {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
-      {/* Seigaiha (青海波) wave pattern - Japanese traditional */}
+      {/* Fine dot grid — future-zen feel */}
       <svg
         className="absolute inset-0 w-full h-full"
         xmlns="http://www.w3.org/2000/svg"
-        style={{ opacity: 0.025 }}
+        style={{ opacity: 0.18 }}
       >
         <defs>
-          <pattern id="seigaiha" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-            {/* Half circles stacked like fish scales */}
-            <circle cx="20" cy="40" r="20" fill="none" stroke="currentColor" strokeWidth="0.8" />
-            <circle cx="0" cy="40" r="20" fill="none" stroke="currentColor" strokeWidth="0.8" />
-            <circle cx="40" cy="40" r="20" fill="none" stroke="currentColor" strokeWidth="0.8" />
-            <circle cx="20" cy="20" r="20" fill="none" stroke="currentColor" strokeWidth="0.8" />
-            <circle cx="0" cy="20" r="20" fill="none" stroke="currentColor" strokeWidth="0.8" />
-            <circle cx="40" cy="20" r="20" fill="none" stroke="currentColor" strokeWidth="0.8" />
+          <pattern id="dotgrid" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse">
+            <circle cx="1" cy="1" r="0.8" fill="currentColor" />
           </pattern>
         </defs>
-        <rect width="100%" height="100%" fill="url(#seigaiha)" style={{ color: 'var(--text)' }} />
+        <rect width="100%" height="100%" fill="url(#dotgrid)" style={{ color: 'var(--border)' }} />
       </svg>
 
-      {/* Radial gradient vignette */}
+      {/* Central radial bloom — soft primary haze */}
+      <div
+        className="absolute"
+        style={{
+          top: '20%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '70vw',
+          height: '60vh',
+          background: 'radial-gradient(ellipse at center, var(--primary) 0%, transparent 70%)',
+          opacity: 0.04,
+          filter: 'blur(40px)',
+        }}
+      />
+
+      {/* Vignette */}
       <div
         className="absolute inset-0"
         style={{
-          background: 'radial-gradient(ellipse at center, transparent 40%, var(--bg) 100%)',
-        }}
-      />
-
-      {/* Top gradient */}
-      <div
-        className="absolute top-0 left-0 right-0 h-32"
-        style={{
-          background: 'linear-gradient(to bottom, var(--bg), transparent)',
-        }}
-      />
-
-      {/* Bottom gradient */}
-      <div
-        className="absolute bottom-0 left-0 right-0 h-32"
-        style={{
-          background: 'linear-gradient(to top, var(--bg), transparent)',
+          background: 'radial-gradient(ellipse at center, transparent 30%, var(--bg) 90%)',
         }}
       />
     </div>

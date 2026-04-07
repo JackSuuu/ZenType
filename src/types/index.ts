@@ -91,9 +91,9 @@ export const THEMES: ThemeConfig[] = [
     labelJp: '抹茶',
     description: '茶室の緑 · Tea Room Green',
     colors: {
-      bg: '#0f1923', surface: '#162030', border: '#1e3040',
-      text: '#e8dcc8', subtext: '#8a9bb0',
-      primary: '#4a7c59', secondary: '#d4a853', error: '#c84b31',
+      bg: '#0b0f0e', surface: '#111815', border: '#1a2620',
+      text: '#c8d4c0', subtext: '#4a5e50',
+      primary: '#5a8f6a', secondary: '#8faa70', error: '#c05040',
     },
   },
   {
@@ -102,9 +102,9 @@ export const THEMES: ThemeConfig[] = [
     labelJp: '墨染',
     description: '水墨の黒 · Ink Wash Black',
     colors: {
-      bg: '#0d0d0d', surface: '#1a1a1a', border: '#2a2a2a',
-      text: '#e0e0e0', subtext: '#666666',
-      primary: '#d0d0d0', secondary: '#888888', error: '#cc4444',
+      bg: '#080808', surface: '#111111', border: '#1e1e1e',
+      text: '#c8c8c8', subtext: '#383838',
+      primary: '#909090', secondary: '#606060', error: '#b04040',
     },
   },
   {
@@ -113,9 +113,9 @@ export const THEMES: ThemeConfig[] = [
     labelJp: '浮世',
     description: '浮世絵の青 · Ukiyo-e Blue',
     colors: {
-      bg: '#0a1628', surface: '#0f2040', border: '#1a3060',
-      text: '#f0e6c0', subtext: '#8090b0',
-      primary: '#4080c0', secondary: '#d4a853', error: '#c84b31',
+      bg: '#070c14', surface: '#0c1420', border: '#131e30',
+      text: '#b8c8d8', subtext: '#2e4058',
+      primary: '#4a7898', secondary: '#6090b0', error: '#b04848',
     },
   },
   {
@@ -124,9 +124,9 @@ export const THEMES: ThemeConfig[] = [
     labelJp: '朱砂',
     description: '朱の赤 · Vermilion Red',
     colors: {
-      bg: '#1a0a05', surface: '#2a1208', border: '#3d1e10',
-      text: '#f5e6d0', subtext: '#9a7060',
-      primary: '#c84b31', secondary: '#d4a853', error: '#ff6b35',
+      bg: '#0d0806', surface: '#150e0a', border: '#261610',
+      text: '#c8b8a8', subtext: '#4a3028',
+      primary: '#b05040', secondary: '#c07050', error: '#d06040',
     },
   },
   {
@@ -135,9 +135,9 @@ export const THEMES: ThemeConfig[] = [
     labelJp: '雪月',
     description: '雪の白 · Snow White',
     colors: {
-      bg: '#0e1520', surface: '#161f2e', border: '#202c3e',
-      text: '#d8e8f0', subtext: '#607080',
-      primary: '#80b0d0', secondary: '#a0c0d0', error: '#d04050',
+      bg: '#080c10', surface: '#0e1318', border: '#161e26',
+      text: '#b8c8d0', subtext: '#2a3a44',
+      primary: '#6090a8', secondary: '#7aa8c0', error: '#a84050',
     },
   },
 ]

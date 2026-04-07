@@ -198,10 +198,9 @@ export const Home: React.FC = () => {
 
               {/* Typing area */}
               <div
-                className="zen-surface rounded-2xl px-8 py-7 cursor-text relative overflow-hidden"
+                className="relative px-2 py-6 cursor-text"
                 style={{ minHeight: '168px' }}
               >
-                <div className="absolute inset-0 pattern-seigaiha pointer-events-none" />
                 <TypingArea viewState={viewState} testState={testState} />
               </div>
 

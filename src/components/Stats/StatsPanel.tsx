@@ -58,7 +58,7 @@ export const StatsPanel: React.FC = () => {
                   className="font-mono font-bold"
                   style={{
                     fontSize: 'clamp(2rem, 5vw, 3.5rem)',
-                    color: timeRemaining <= 5 ? 'var(--error)' : 'var(--secondary)',
+                    color: timeRemaining <= 5 ? 'var(--error)' : 'var(--text)',
                     lineHeight: 1,
                   }}
                 >
@@ -69,7 +69,7 @@ export const StatsPanel: React.FC = () => {
             ) : mode === 'words' ? (
               <>
                 <div className="font-mono font-bold"
-                  style={{ fontSize: 'clamp(1.5rem, 3vw, 2.5rem)', color: 'var(--secondary)', lineHeight: 1 }}
+                  style={{ fontSize: 'clamp(1.5rem, 3vw, 2.5rem)', color: 'var(--text)', lineHeight: 1 }}
                 >
                   {currentWordIndex}<span className="opacity-40">/{wordCount || words.length}</span>
                 </div>
@@ -80,7 +80,7 @@ export const StatsPanel: React.FC = () => {
                 >
                   <motion.div
                     className="h-full rounded-full"
-                    style={{ background: 'var(--secondary)' }}
+                    style={{ background: 'var(--primary)' }}
                     animate={{ width: `${progress}%` }}
                     transition={{ duration: 0.3 }}
                   />
