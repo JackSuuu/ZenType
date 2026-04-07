@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useSettingsStore } from '../../stores/settingsStore'
@@ -18,11 +18,21 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
   const { token, user, isLoading, logout } = useAuthStore()
   const bestWpm = getBestWpm()
 
-  const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID as string | undefined
+  const [clientId, setClientId] = useState<string | null>(null)
+
+  useEffect(() => {
+    // Fetch client_id from server so we don't depend on VITE_ env vars
+    fetch('/api/auth/client-id')
+      .then((r) => r.json())
+      .then((data: { client_id?: string }) => {
+        if (data.client_id) setClientId(data.client_id)
+      })
+      .catch(() => {})
+  }, [])
 
   const handleLogin = () => {
     if (!clientId) {
-      console.warn('VITE_GITHUB_CLIENT_ID is not set')
+      console.warn('GitHub client_id not available')
       return
     }
     const redirectUri = window.location.origin
