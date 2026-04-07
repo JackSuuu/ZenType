@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react'
+import React, { useMemo, useRef, useCallback, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useSettingsStore } from '../../stores/settingsStore'
 import type { TypingViewState } from '../../hooks/useTypingEngine'
@@ -7,6 +7,8 @@ import clsx from 'clsx'
 interface TypingAreaProps {
   viewState: TypingViewState
   testState: string
+  /** Called when the hidden input fires a key — used by mobile to drive the engine */
+  onMobileKey?: (key: string) => void
 }
 
 const FONT_SIZE_MAP = {
@@ -33,8 +35,7 @@ const WordSpan = React.memo(function WordSpan({
   typedWord: string
   blindMode: boolean
 }) {
-  // Extra chars typed beyond word length — always render a fixed-width
-  // placeholder so the span width never changes when extra chars appear/disappear
+  // Extra chars typed beyond word length
   const extraTyped = isCurrentWord ? typedWord.slice(word.original.length) : ''
 
   return (
@@ -66,7 +67,7 @@ const WordSpan = React.memo(function WordSpan({
         <span className="char-extra">{extraTyped}</span>
       )}
 
-      {/* Cursor beam — always in DOM for current word, fades out on transition */}
+      {/* Cursor beam at end of word */}
       <span
         className="char-cursor-beam"
         style={{
@@ -78,9 +79,13 @@ const WordSpan = React.memo(function WordSpan({
   )
 })
 
-export const TypingArea: React.FC<TypingAreaProps> = ({ viewState, testState }) => {
+export const TypingArea: React.FC<TypingAreaProps> = ({ viewState, testState, onMobileKey }) => {
   const { blindMode, fontSize } = useSettingsStore()
   const { words, currentWordIndex, typedWord } = viewState
+
+  // Hidden input ref for mobile virtual keyboard
+  const hiddenInputRef = useRef<HTMLInputElement>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
 
   // Track which display-line we're on to animate when it scrolls
   const currentLine = Math.floor(currentWordIndex / WORDS_PER_LINE)
@@ -96,17 +101,112 @@ export const TypingArea: React.FC<TypingAreaProps> = ({ viewState, testState }) 
     return { words: words.slice(startIdx, endIdx), offset: startIdx }
   }, [words, currentLine])
 
+  // Keep hidden input focused whenever the test is active or idle
+  const focusInput = useCallback(() => {
+    hiddenInputRef.current?.focus({ preventScroll: true })
+  }, [])
+
+  // Auto-focus on mount and state changes
+  useEffect(() => {
+    if (testState !== 'finished') {
+      focusInput()
+    }
+  }, [testState, focusInput])
+
+  // Handle mobile input events: map `input` events → synthetic key presses
+  // This fires from the virtual keyboard's composition input
+  const lastValueRef = useRef('')
+  const handleInput = useCallback((e: React.FormEvent<HTMLInputElement>) => {
+    const input = e.currentTarget
+    const newValue = input.value
+    const old = lastValueRef.current
+
+    if (newValue.length > old.length) {
+      // Characters added
+      const added = newValue.slice(old.length)
+      for (const ch of added) {
+        onMobileKey?.(ch)
+      }
+    } else if (newValue.length < old.length) {
+      // Backspace(s)
+      const deletedCount = old.length - newValue.length
+      for (let i = 0; i < deletedCount; i++) {
+        onMobileKey?.('Backspace')
+      }
+    }
+
+    lastValueRef.current = newValue
+
+    // Keep input value short to prevent it growing unbounded.
+    // We reset to a stable sentinel after every word (space) is processed.
+    if (newValue.includes(' ')) {
+      onMobileKey?.(' ')
+      input.value = ''
+      lastValueRef.current = ''
+    }
+  }, [onMobileKey])
+
+  // Also handle keydown for physical keyboards (already handled by global listener,
+  // but we still call preventDefault to avoid the input value growing visibly).
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Space and Enter on mobile: treat space as word-advance
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault()
+    }
+  }, [])
+
   if (words.length === 0) return null
 
   return (
     <div
+      ref={wrapperRef}
       className={clsx(
         'relative font-mono select-none',
         FONT_SIZE_MAP[fontSize],
         LINE_HEIGHT,
+        // Make the whole area tappable on mobile to focus the hidden input
+        'cursor-text',
       )}
       style={{ color: 'var(--subtext)' }}
+      onClick={focusInput}
+      onTouchStart={focusInput}
     >
+      {/*
+        Hidden input — kept in the DOM always so iOS/Android can show the virtual
+        keyboard.  It's visually invisible (opacity:0, size 1px) but positioned
+        inside the typing area so the keyboard appears near the words on scroll.
+        `inputMode="text"` keeps the full QWERTY keyboard open on mobile.
+        `autocorrect="off"` / `autocapitalize="none"` prevent iOS from mangling input.
+      */}
+      <input
+        ref={hiddenInputRef}
+        type="text"
+        inputMode="text"
+        autoCorrect="off"
+        autoCapitalize="none"
+        autoComplete="off"
+        spellCheck={false}
+        aria-hidden="true"
+        tabIndex={-1}
+        onInput={handleInput}
+        onKeyDown={handleKeyDown}
+        style={{
+          position: 'absolute',
+          opacity: 0,
+          width: '1px',
+          height: '1px',
+          top: '50%',
+          left: '50%',
+          pointerEvents: 'none',
+          border: 'none',
+          background: 'transparent',
+          color: 'transparent',
+          caretColor: 'transparent',
+          fontSize: '16px', // prevent iOS zoom-in on focus
+          zIndex: -1,
+        }}
+      />
+
       {/* Use currentLine as key so the word block animates when lines scroll */}
       <motion.div
         key={Math.max(0, currentLine - 1)}
@@ -141,7 +241,7 @@ export const TypingArea: React.FC<TypingAreaProps> = ({ viewState, testState }) 
             className="font-mono text-sm"
             style={{ color: 'var(--subtext)', opacity: 0.4 }}
           >
-            start typing...
+            tap or start typing...
           </span>
         </div>
       )}

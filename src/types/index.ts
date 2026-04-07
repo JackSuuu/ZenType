@@ -1,6 +1,6 @@
 // ===== Core Types =====
 
-export type ThemeName = 'matcha' | 'sumi' | 'ukiyo' | 'shu' | 'yuki'
+export type ThemeName = 'matcha' | 'sumi' | 'ukiyo' | 'shu' | 'yuki' | 'neon' | 'aurora' | 'candy'
 
 export type TestMode = 'time' | 'words' | 'quote' | 'zen'
 
@@ -138,6 +138,39 @@ export const THEMES: ThemeConfig[] = [
       bg: '#080c10', surface: '#0e1318', border: '#161e26',
       text: '#b8c8d0', subtext: '#2a3a44',
       primary: '#6090a8', secondary: '#7aa8c0', error: '#a84050',
+    },
+  },
+  {
+    name: 'neon',
+    label: 'Neon',
+    labelJp: 'ネオン',
+    description: 'サイバーの光 · Cyber Glow',
+    colors: {
+      bg: '#0a0a12', surface: '#10101e', border: '#1e1e36',
+      text: '#e0e0ff', subtext: '#4040a0',
+      primary: '#00f5ff', secondary: '#bf00ff', error: '#ff2060',
+    },
+  },
+  {
+    name: 'aurora',
+    label: 'Aurora',
+    labelJp: 'オーロラ',
+    description: '極光の緑 · Northern Lights',
+    colors: {
+      bg: '#060e10', surface: '#0c1a1e', border: '#12282e',
+      text: '#d0ffe8', subtext: '#2a5040',
+      primary: '#00e5a0', secondary: '#00c8e8', error: '#ff4466',
+    },
+  },
+  {
+    name: 'candy',
+    label: 'Candy',
+    labelJp: '飴色',
+    description: '甘い色 · Sweet Colors',
+    colors: {
+      bg: '#120810', surface: '#1e0e1c', border: '#2e1430',
+      text: '#ffe0f8', subtext: '#604060',
+      primary: '#ff6eb4', secondary: '#ffb347', error: '#ff3366',
     },
   },
 ]

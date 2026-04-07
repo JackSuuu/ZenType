@@ -72,22 +72,19 @@ export function useTypingEngine() {
     })
   }, [])
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.altKey || e.metaKey) return
-      if (e.key.length > 1 && e.key !== 'Backspace' && e.key !== ' ') return
-
+  // Core key processing — shared by physical keyboard (via handleKeyDown) and
+  // mobile virtual keyboard (via handleMobileKey / TypingArea's hidden input).
+  const processKey = useCallback(
+    (key: string) => {
       const testState = store.testState
       if (testState === 'finished') return
-
-      e.preventDefault()
 
       // Start test on first keypress
       if (testState === 'idle') {
         store.startTest()
       }
 
-      if (e.key === 'Backspace') {
+      if (key === 'Backspace') {
         const typed = typedWordRef.current
         if (typed.length === 0) return
 
@@ -108,7 +105,7 @@ export function useTypingEngine() {
         return
       }
 
-      if (e.key === ' ') {
+      if (key === ' ') {
         const typed = typedWordRef.current
         if (typed.length === 0) return
 
@@ -174,11 +171,11 @@ export function useTypingEngine() {
       if (!word) return
 
       const typed = typedWordRef.current
-      const newTyped = typed + e.key
+      const newTyped = typed + key
       typedWordRef.current = newTyped
 
       const expectedChar = word.original[typed.length]
-      const isCorrect = e.key === expectedChar
+      const isCorrect = key === expectedChar
 
       play(isCorrect ? 'keypress' : 'error')
 
@@ -191,12 +188,23 @@ export function useTypingEngine() {
       }))
       word.hasError = word.chars.some(c => c.status === 'error')
 
-      keystrokesRef.current.push({ key: e.key, correct: isCorrect, timestamp: Date.now() })
+      keystrokesRef.current.push({ key, correct: isCorrect, timestamp: Date.now() })
 
       flushView()
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [store.testState, store.mode, play, flushView]
+  )
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.altKey || e.metaKey) return
+      if (e.key.length > 1 && e.key !== 'Backspace' && e.key !== ' ') return
+
+      e.preventDefault()
+      processKey(e.key)
+    },
+    [processKey]
   )
 
   useEffect(() => {
@@ -210,5 +218,7 @@ export function useTypingEngine() {
     }
   }, [storeTestState, play])
 
-  return { viewState, store }
+  // handleMobileKey is passed to TypingArea for use with the hidden input
+  return { viewState, store, handleMobileKey: processKey }
 }
+

@@ -70,6 +70,45 @@
   --correct: #6090a8;
 }
 
+[data-theme='neon'] {
+  /* Neon — cyber void, electric cyan/violet */
+  --bg: #0a0a12;
+  --surface: #10101e;
+  --border: #1e1e36;
+  --text: #e0e0ff;
+  --subtext: #4040a0;
+  --primary: #00f5ff;
+  --secondary: #bf00ff;
+  --error: #ff2060;
+  --correct: #00f5ff;
+}
+
+[data-theme='aurora'] {
+  /* Aurora — dark teal, northern lights green */
+  --bg: #060e10;
+  --surface: #0c1a1e;
+  --border: #12282e;
+  --text: #d0ffe8;
+  --subtext: #2a5040;
+  --primary: #00e5a0;
+  --secondary: #00c8e8;
+  --error: #ff4466;
+  --correct: #00e5a0;
+}
+
+[data-theme='candy'] {
+  /* Candy — deep purple-black, hot pink */
+  --bg: #120810;
+  --surface: #1e0e1c;
+  --border: #2e1430;
+  --text: #ffe0f8;
+  --subtext: #604060;
+  --primary: #ff6eb4;
+  --secondary: #ffb347;
+  --error: #ff3366;
+  --correct: #ff6eb4;
+}
+
 /* ===== Base Styles ===== */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -80,6 +119,9 @@
 html {
   scroll-behavior: smooth;
   font-size: 16px;
+  /* Force GPU layer for the whole document to avoid compositing hitches */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -89,9 +131,13 @@ body {
   transition: background-color 0.4s ease, color 0.4s ease;
   overflow-x: hidden;
   min-height: 100vh;
+  min-height: 100dvh;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Prevent text size bump on mobile orientation change */
+  touch-action: manipulation;
+  overscroll-behavior: none;
 }
 
 #root {
@@ -146,14 +192,17 @@ body {
   }
 
   /* Typing characters — very short fade so color doesn't feel harsh,
-     but short enough (40ms) that it never lags behind fast typing */
+     but short enough (40ms) that it never lags behind fast typing.
+     Use `will-change: color` to keep char spans on their own compositor layers. */
   .char-pending {
     color: var(--subtext);
-    transition: color 0.04s ease;
+    transition: color 0.04s linear;
+    will-change: color;
   }
   .char-correct {
-    color: var(--text);
-    transition: color 0.04s ease;
+    color: var(--correct, var(--text));
+    transition: color 0.04s linear;
+    will-change: color;
   }
   .char-error {
     color: var(--error);
@@ -161,7 +210,8 @@ body {
     text-decoration-color: var(--error);
     text-underline-offset: 3px;
     text-decoration-thickness: 1px;
-    transition: color 0.04s ease;
+    transition: color 0.04s linear;
+    will-change: color;
   }
   .char-extra {
     color: var(--error);
@@ -171,6 +221,7 @@ body {
   .char-cursor {
     position: relative;
   }
+  /* Caret uses transform for GPU-accelerated blink — no layout reflow */
   .char-cursor::before {
     content: '';
     position: absolute;
@@ -180,11 +231,12 @@ body {
     width: 2px;
     background: var(--primary);
     border-radius: 2px;
-    animation: cursorBlink 1s ease-in-out infinite;
+    transform-origin: center;
+    animation: cursorBlink 1.05s ease-in-out infinite;
+    will-change: opacity, transform;
   }
 
-  /* End-of-word cursor beam — opacity transition so it fades out
-     instead of popping, preventing the word-shift visual artifact */
+  /* End-of-word cursor beam */
   .char-cursor-beam {
     position: relative;
     display: inline;
@@ -199,7 +251,8 @@ body {
     width: 2px;
     background: var(--primary);
     border-radius: 2px;
-    animation: cursorBlink 1s ease-in-out infinite;
+    animation: cursorBlink 1.05s ease-in-out infinite;
+    will-change: opacity;
   }
 
   /* Stats */
@@ -232,7 +285,11 @@ body {
 /* ===== Keyframes ===== */
 @keyframes cursorBlink {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+  45%, 55% { opacity: 0; }
+}
+@keyframes cursorBlinkSmooth {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.15; }
 }
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -256,6 +313,20 @@ body {
   50% { transform: translateY(50vh) rotate(180deg); }
   90% { opacity: 0.7; }
   100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+}
+
+/* Neon/Aurora/Candy cursor glow — active when caret is on a bright-theme char */
+[data-theme='neon'] .char-cursor::before,
+[data-theme='aurora'] .char-cursor::before,
+[data-theme='candy'] .char-cursor::before {
+  box-shadow: 0 0 6px 1px var(--primary);
+  animation: cursorBlinkSmooth 1.05s ease-in-out infinite;
+}
+[data-theme='neon'] .char-cursor-beam::before,
+[data-theme='aurora'] .char-cursor-beam::before,
+[data-theme='candy'] .char-cursor-beam::before {
+  box-shadow: 0 0 6px 1px var(--primary);
+  animation: cursorBlinkSmooth 1.05s ease-in-out infinite;
 }
 
 /* Focus */

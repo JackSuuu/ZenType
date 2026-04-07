@@ -59,7 +59,7 @@ export const Home: React.FC = () => {
   const { testState, mode, timeLimit, wordCount, lastResult } = store
 
   // useTypingEngine now owns words locally and returns viewState for TypingArea
-  const { viewState } = useTypingEngine()
+  const { viewState, handleMobileKey } = useTypingEngine()
   useTimer()
 
   // Init test on mount and when config changes
@@ -115,14 +115,14 @@ export const Home: React.FC = () => {
 
   return (
     <div
-      className="flex-1 flex flex-col items-center justify-center px-4 py-8"
+      className="flex-1 flex flex-col items-center justify-center px-3 sm:px-4 py-6 sm:py-8"
       style={{ position: 'relative' }}
     >
       {petals.map((p) => (
         <SakuraPetal key={p.id} style={{ left: `${p.left}%`, top: '-20px' }} />
       ))}
 
-      <div className="w-full max-w-3xl">
+      <div className="w-full max-w-3xl" style={{ touchAction: 'manipulation' }}>
         <AnimatePresence mode="wait">
           {isFinished && lastResult ? (
             <Results
@@ -198,10 +198,10 @@ export const Home: React.FC = () => {
 
               {/* Typing area */}
               <div
-                className="relative px-2 py-6 cursor-text"
+                className="relative px-1 sm:px-2 py-5 sm:py-6 cursor-text"
                 style={{ minHeight: '168px' }}
               >
-                <TypingArea viewState={viewState} testState={testState} />
+                <TypingArea viewState={viewState} testState={testState} onMobileKey={handleMobileKey} />
               </div>
 
               {/* Tab hint */}
