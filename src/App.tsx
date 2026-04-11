@@ -7,6 +7,7 @@ import { Home } from './pages/Home'
 import { History } from './pages/History'
 import { useTheme } from './hooks/useTheme'
 import { BackgroundPattern } from './components/ui/BackgroundPattern'
+import { ThemePalette } from './components/ui/ThemePalette'
 import { useAuthStore } from './stores/authStore'
 import { useGistSync } from './hooks/useGistSync'
 import type { GitHubUser } from './stores/authStore'
@@ -103,6 +104,9 @@ const AppContent: React.FC = () => {
       >
         <SettingsPanel />
       </Modal>
+
+      {/* Ctrl+P Theme Palette */}
+      <ThemePalette />
     </div>
   )
 }

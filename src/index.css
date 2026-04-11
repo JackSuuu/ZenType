@@ -16,6 +16,9 @@
   --secondary: #8faa70;
   --error: #c05040;
   --correct: #5a8f6a;
+  /* overlay: used for hover/active tints — white on dark, black on light */
+  --overlay-sm: rgba(255,255,255,0.04);
+  --overlay-md: rgba(255,255,255,0.06);
 }
 
 [data-theme='sumi'] {
@@ -29,6 +32,8 @@
   --secondary: #606060;
   --error: #b04040;
   --correct: #909090;
+  --overlay-sm: rgba(255,255,255,0.04);
+  --overlay-md: rgba(255,255,255,0.06);
 }
 
 [data-theme='ukiyo'] {
@@ -42,6 +47,8 @@
   --secondary: #6090b0;
   --error: #b04848;
   --correct: #4a7898;
+  --overlay-sm: rgba(255,255,255,0.04);
+  --overlay-md: rgba(255,255,255,0.06);
 }
 
 [data-theme='shu'] {
@@ -55,6 +62,8 @@
   --secondary: #c07050;
   --error: #d06040;
   --correct: #b05040;
+  --overlay-sm: rgba(255,255,255,0.04);
+  --overlay-md: rgba(255,255,255,0.06);
 }
 
 [data-theme='yuki'] {
@@ -68,6 +77,8 @@
   --secondary: #7aa8c0;
   --error: #a84050;
   --correct: #6090a8;
+  --overlay-sm: rgba(255,255,255,0.04);
+  --overlay-md: rgba(255,255,255,0.06);
 }
 
 [data-theme='neon'] {
@@ -81,6 +92,8 @@
   --secondary: #bf00ff;
   --error: #ff2060;
   --correct: #00f5ff;
+  --overlay-sm: rgba(255,255,255,0.04);
+  --overlay-md: rgba(255,255,255,0.06);
 }
 
 [data-theme='aurora'] {
@@ -94,6 +107,8 @@
   --secondary: #00c8e8;
   --error: #ff4466;
   --correct: #00e5a0;
+  --overlay-sm: rgba(255,255,255,0.04);
+  --overlay-md: rgba(255,255,255,0.06);
 }
 
 [data-theme='candy'] {
@@ -107,6 +122,55 @@
   --secondary: #ffb347;
   --error: #ff3366;
   --correct: #ff6eb4;
+  --overlay-sm: rgba(255,255,255,0.04);
+  --overlay-md: rgba(255,255,255,0.06);
+}
+
+/* ── Light themes ────────────────────────────────────────────────────────── */
+
+[data-theme='washi'] {
+  /* Washi — Japanese paper white, ink-wash green */
+  --bg: #f5f2ed;
+  --surface: #ede9e2;
+  --border: #d8d0c4;
+  --text: #2a2520;
+  --subtext: #a89880;
+  --primary: #4a7a5a;
+  --secondary: #6a9a6a;
+  --error: #b03028;
+  --correct: #4a7a5a;
+  --overlay-sm: rgba(0,0,0,0.04);
+  --overlay-md: rgba(0,0,0,0.06);
+}
+
+[data-theme='hana'] {
+  /* Hana — petal white, cherry blossom pink */
+  --bg: #faf5f5;
+  --surface: #f2eaeb;
+  --border: #e0d0d2;
+  --text: #2e1e22;
+  --subtext: #b090a0;
+  --primary: #c05878;
+  --secondary: #d08090;
+  --error: #a02840;
+  --correct: #c05878;
+  --overlay-sm: rgba(0,0,0,0.04);
+  --overlay-md: rgba(0,0,0,0.06);
+}
+
+[data-theme='cha'] {
+  /* Cha — warm rice white, tea-brown */
+  --bg: #f7f2eb;
+  --surface: #ede6d8;
+  --border: #d4c8b4;
+  --text: #28200e;
+  --subtext: #a08858;
+  --primary: #7a5828;
+  --secondary: #9a7840;
+  --error: #a03820;
+  --correct: #7a5828;
+  --overlay-sm: rgba(0,0,0,0.04);
+  --overlay-md: rgba(0,0,0,0.06);
 }
 
 /* ===== Base Styles ===== */
@@ -203,6 +267,7 @@ body {
     color: var(--correct, var(--text));
     transition: color 0.04s linear;
     will-change: color;
+    animation: charCorrect 0.14s ease-out both;
   }
   .char-error {
     color: var(--error);
@@ -212,10 +277,12 @@ body {
     text-decoration-thickness: 1px;
     transition: color 0.04s linear;
     will-change: color;
+    animation: charError 0.12s ease-out both;
   }
   .char-extra {
     color: var(--error);
     opacity: 0.6;
+    animation: charError 0.12s ease-out both;
   }
 
   .char-cursor {
@@ -283,6 +350,19 @@ body {
 }
 
 /* ===== Keyframes ===== */
+
+/* Per-character entrance animations — the subtle vertical nudge gives
+   the "flowing water" feel of MonkeyType without any layout cost.
+   Uses transform (GPU) + opacity only, never triggers reflow. */
+@keyframes charCorrect {
+  from { opacity: 0.5; transform: translateY(2px); }
+  to   { opacity: 1;   transform: translateY(0);   }
+}
+@keyframes charError {
+  from { opacity: 0.6; transform: translateY(-1px) scale(0.97); }
+  to   { opacity: 1;   transform: translateY(0)    scale(1);    }
+}
+
 @keyframes cursorBlink {
   0%, 100% { opacity: 1; }
   45%, 55% { opacity: 0; }
@@ -340,4 +420,33 @@ body {
 ::selection {
   background: var(--primary);
   color: var(--bg);
+}
+
+/* ── Light-theme overrides ───────────────────────────────────────────────── */
+/* On light backgrounds, invert the selection so text stays readable */
+[data-theme='washi'] ::selection,
+[data-theme='hana'] ::selection,
+[data-theme='cha'] ::selection {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+/* Scrollbar is dark on light themes */
+[data-theme='washi'] ::-webkit-scrollbar-thumb,
+[data-theme='hana'] ::-webkit-scrollbar-thumb,
+[data-theme='cha'] ::-webkit-scrollbar-thumb {
+  background: var(--border);
+}
+[data-theme='washi'] ::-webkit-scrollbar-thumb:hover,
+[data-theme='hana'] ::-webkit-scrollbar-thumb:hover,
+[data-theme='cha'] ::-webkit-scrollbar-thumb:hover {
+  background: var(--subtext);
+}
+
+/* Surface overlays that use rgba(255,255,255,…) look invisible on light bg —
+   override with a dark-tinted version */
+[data-theme='washi'] .zen-surface,
+[data-theme='hana'] .zen-surface,
+[data-theme='cha'] .zen-surface {
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }

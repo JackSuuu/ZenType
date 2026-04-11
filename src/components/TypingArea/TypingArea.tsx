@@ -28,12 +28,14 @@ const WordSpan = React.memo(function WordSpan({
   isPastWord,
   typedWord,
   blindMode,
+  renderTick,
 }: {
   word: { original: string; chars: { char: string; status: string }[]; isCompleted: boolean; hasError: boolean }
   isCurrentWord: boolean
   isPastWord: boolean
   typedWord: string
   blindMode: boolean
+  renderTick: number
 }) {
   // Extra chars typed beyond word length
   const extraTyped = isCurrentWord ? typedWord.slice(word.original.length) : ''
@@ -55,6 +57,10 @@ const WordSpan = React.memo(function WordSpan({
         return (
           <span
             key={charIdx}
+            // data-tick forces the browser to restart the CSS animation each time
+            // this char's status changes — without it, going pending→correct→pending→correct
+            // wouldn't re-trigger the charCorrect keyframe the second time.
+            data-tick={statusClass !== 'char-pending' ? renderTick : undefined}
             className={clsx(statusClass, isCurrentChar && 'char-cursor')}
           >
             {charData.char}
@@ -64,7 +70,7 @@ const WordSpan = React.memo(function WordSpan({
 
       {/* Extra typed characters — only visible when isCurrentWord */}
       {extraTyped && (
-        <span className="char-extra">{extraTyped}</span>
+        <span className="char-extra" data-tick={renderTick}>{extraTyped}</span>
       )}
 
       {/* Cursor beam at end of word */}
@@ -81,7 +87,7 @@ const WordSpan = React.memo(function WordSpan({
 
 export const TypingArea: React.FC<TypingAreaProps> = ({ viewState, testState, onMobileKey }) => {
   const { blindMode, fontSize } = useSettingsStore()
-  const { words, currentWordIndex, typedWord } = viewState
+  const { words, currentWordIndex, typedWord, renderTick } = viewState
 
   // Hidden input ref for mobile virtual keyboard
   const hiddenInputRef = useRef<HTMLInputElement>(null)
@@ -229,6 +235,7 @@ export const TypingArea: React.FC<TypingAreaProps> = ({ viewState, testState, on
               isPastWord={isPastWord}
               typedWord={isCurrentWord ? typedWord : ''}
               blindMode={blindMode}
+              renderTick={renderTick}
             />
           )
         })}

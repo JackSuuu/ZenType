@@ -152,7 +152,7 @@ export const History: React.FC = () => {
                   transition={{ delay: i * 0.02 }}
                   className="transition-colors duration-150"
                   style={{ borderBottom: '1px solid var(--border)', opacity: i === 0 ? 1 : 0.85 }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--overlay-sm)')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 >
                   <td className="px-4 py-2.5 font-bold" style={{ color: 'var(--primary)' }}>

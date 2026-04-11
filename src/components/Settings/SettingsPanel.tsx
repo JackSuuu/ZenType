@@ -48,12 +48,12 @@ export const SettingsPanel: React.FC = () => {
               key={theme.name}
               onClick={() => settings.setTheme(theme.name as ThemeName)}
               className="flex items-center gap-3 p-3 rounded-xl transition-all duration-200 cursor-pointer text-left w-full"
-              style={{
-                background: settings.theme === theme.name
-                  ? 'rgba(255,255,255,0.06)'
-                  : 'transparent',
-                border: `1px solid ${settings.theme === theme.name ? 'var(--primary)' : 'var(--border)'}`,
-              }}
+                style={{
+                  background: settings.theme === theme.name
+                    ? 'var(--overlay-md)'
+                    : 'transparent',
+                  border: `1px solid ${settings.theme === theme.name ? 'var(--primary)' : 'var(--border)'}`,
+                }}
             >
               {/* Color preview dots */}
               <div className="flex gap-1 flex-shrink-0">

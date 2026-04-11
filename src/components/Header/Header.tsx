@@ -99,7 +99,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
                 <motion.div
                   layoutId="nav-indicator"
                   className="absolute inset-0 rounded-md"
-                  style={{ background: 'rgba(255,255,255,0.05)' }}
+                  style={{ background: 'var(--overlay-md)' }}
                 />
               )}
               <span className="relative z-10">{link.label}</span>
@@ -112,7 +112,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
           {/* Best WPM badge — desktop only */}
           {bestWpm > 0 && (
             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-md"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)' }}
+              style={{ background: 'var(--overlay-sm)', border: '1px solid var(--border)' }}
             >
               <span className="font-mono text-sm font-bold" style={{ color: 'var(--secondary)' }}>
                 {bestWpm}
@@ -282,7 +282,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
                   className="flex-1 text-center py-2.5 rounded-lg font-mono text-sm transition-colors duration-150"
                   style={{
                     color: location.pathname === link.path ? 'var(--primary)' : 'var(--subtext)',
-                    background: location.pathname === link.path ? 'rgba(255,255,255,0.05)' : 'transparent',
+                    background: location.pathname === link.path ? 'var(--overlay-md)' : 'transparent',
                     border: '1px solid var(--border)',
                   }}
                 >
@@ -307,7 +307,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
                     )}
                     style={{
                       border: theme === t.name ? `1px solid ${t.colors.primary}` : '1px solid var(--border)',
-                      background: theme === t.name ? 'rgba(255,255,255,0.05)' : 'transparent',
+                      background: theme === t.name ? 'var(--overlay-md)' : 'transparent',
                       color: theme === t.name ? t.colors.primary : 'var(--subtext)',
                     }}
                   >
@@ -324,7 +324,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
             {/* PB badge on mobile */}
             {bestWpm > 0 && (
               <div className="flex items-center gap-1.5 px-3 py-2 rounded-md w-fit"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)' }}
+                style={{ background: 'var(--overlay-sm)', border: '1px solid var(--border)' }}
               >
                 <span className="font-mono text-sm font-bold" style={{ color: 'var(--secondary)' }}>
                   {bestWpm}

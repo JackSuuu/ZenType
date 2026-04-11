@@ -139,59 +139,58 @@ export const Home: React.FC = () => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              {/* Mode / config selector — only shown when idle */}
-              <AnimatePresence>
-                {testState === 'idle' && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: 0.15 }}
-                    className="flex flex-col items-center gap-4 mb-8"
-                  >
-                    <Tabs
-                      tabs={MODE_TABS}
-                      activeTab={mode}
-                      onChange={(id) => store.setMode(id as any)}
-                    />
+              {/* Mode / config selector — always in DOM, animates in/out without layout shift */}
+              <motion.div
+                animate={testState === 'idle'
+                  ? { opacity: 1, y: 0, maxHeight: 200, pointerEvents: 'auto' }
+                  : { opacity: 0, y: -8, maxHeight: 0, pointerEvents: 'none' }
+                }
+                initial={false}
+                transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+                style={{ overflow: 'hidden' }}
+                className="flex flex-col items-center gap-4 mb-8"
+              >
+                <Tabs
+                  tabs={MODE_TABS}
+                  activeTab={mode}
+                  onChange={(id) => store.setMode(id as any)}
+                />
 
-                    <div className="flex flex-wrap items-center justify-center gap-2">
-                      {mode === 'time' && TIME_OPTIONS.map((opt) => (
-                        <button
-                          key={opt.id}
-                          onClick={() => store.setTimeLimit(Number(opt.id))}
-                          className={clsx('zen-btn text-xs', timeLimit === Number(opt.id) && 'active')}
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
-                      {mode === 'words' && WORD_OPTIONS.map((opt) => (
-                        <button
-                          key={opt.id}
-                          onClick={() => store.setWordCount(Number(opt.id))}
-                          className={clsx('zen-btn text-xs', wordCount === Number(opt.id) && 'active')}
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  {mode === 'time' && TIME_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.id}
+                      onClick={() => store.setTimeLimit(Number(opt.id))}
+                      className={clsx('zen-btn text-xs', timeLimit === Number(opt.id) && 'active')}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                  {mode === 'words' && WORD_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.id}
+                      onClick={() => store.setWordCount(Number(opt.id))}
+                      className={clsx('zen-btn text-xs', wordCount === Number(opt.id) && 'active')}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
 
-                    {mode !== 'quote' && mode !== 'zen' && (
-                      <div className="flex flex-wrap items-center justify-center gap-2">
-                        {LANG_OPTIONS.map((lang) => (
-                          <button
-                            key={lang.id}
-                            onClick={() => setLanguage(lang.id as any)}
-                            className={clsx('zen-btn text-xs', language === lang.id && 'active')}
-                          >
-                            {lang.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </motion.div>
+                {mode !== 'quote' && mode !== 'zen' && (
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    {LANG_OPTIONS.map((lang) => (
+                      <button
+                        key={lang.id}
+                        onClick={() => setLanguage(lang.id as any)}
+                        className={clsx('zen-btn text-xs', language === lang.id && 'active')}
+                      >
+                        {lang.label}
+                      </button>
+                    ))}
+                  </div>
                 )}
-              </AnimatePresence>
+              </motion.div>
 
               {/* Live stats bar */}
               <StatsPanel />

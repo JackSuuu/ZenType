@@ -1,6 +1,6 @@
 // ===== Core Types =====
 
-export type ThemeName = 'matcha' | 'sumi' | 'ukiyo' | 'shu' | 'yuki' | 'neon' | 'aurora' | 'candy'
+export type ThemeName = 'matcha' | 'sumi' | 'ukiyo' | 'shu' | 'yuki' | 'neon' | 'aurora' | 'candy' | 'washi' | 'hana' | 'cha'
 
 export type TestMode = 'time' | 'words' | 'quote' | 'zen'
 
@@ -171,6 +171,40 @@ export const THEMES: ThemeConfig[] = [
       bg: '#120810', surface: '#1e0e1c', border: '#2e1430',
       text: '#ffe0f8', subtext: '#604060',
       primary: '#ff6eb4', secondary: '#ffb347', error: '#ff3366',
+    },
+  },
+  // ── Light themes ──────────────────────────────────────────────────────────
+  {
+    name: 'washi',
+    label: 'Washi',
+    labelJp: '和紙',
+    description: '和紙の白 · Japanese Paper',
+    colors: {
+      bg: '#f5f2ed', surface: '#ede9e2', border: '#d8d0c4',
+      text: '#2a2520', subtext: '#a89880',
+      primary: '#4a7a5a', secondary: '#6a9a6a', error: '#b03028',
+    },
+  },
+  {
+    name: 'hana',
+    label: 'Hana',
+    labelJp: '花',
+    description: '桜の春 · Cherry Blossom',
+    colors: {
+      bg: '#faf5f5', surface: '#f2eaeb', border: '#e0d0d2',
+      text: '#2e1e22', subtext: '#b090a0',
+      primary: '#c05878', secondary: '#d08090', error: '#a02840',
+    },
+  },
+  {
+    name: 'cha',
+    label: 'Cha',
+    labelJp: '茶',
+    description: '茶道の静 · Way of Tea',
+    colors: {
+      bg: '#f7f2eb', surface: '#ede6d8', border: '#d4c8b4',
+      text: '#28200e', subtext: '#a08858',
+      primary: '#7a5828', secondary: '#9a7840', error: '#a03820',
     },
   },
 ]
