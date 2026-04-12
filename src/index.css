@@ -255,19 +255,15 @@ body {
     color: var(--text);
   }
 
-  /* Typing characters — very short fade so color doesn't feel harsh,
-     but short enough (40ms) that it never lags behind fast typing.
-     Use `will-change: color` to keep char spans on their own compositor layers. */
+  /* Typing characters — instant color swap (no transition) for snappy feel.
+     Animations use GPU-only properties (transform + opacity).
+     Avoid will-change on every char — hundreds of promoted layers kills perf. */
   .char-pending {
     color: var(--subtext);
-    transition: color 0.04s linear;
-    will-change: color;
   }
   .char-correct {
     color: var(--correct, var(--text));
-    transition: color 0.04s linear;
-    will-change: color;
-    animation: charCorrect 0.14s ease-out both;
+    animation: charCorrect 0.18s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
   .char-error {
     color: var(--error);
@@ -275,14 +271,12 @@ body {
     text-decoration-color: var(--error);
     text-underline-offset: 3px;
     text-decoration-thickness: 1px;
-    transition: color 0.04s linear;
-    will-change: color;
-    animation: charError 0.12s ease-out both;
+    animation: charError 0.16s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
   .char-extra {
     color: var(--error);
     opacity: 0.6;
-    animation: charError 0.12s ease-out both;
+    animation: charError 0.16s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
 
   .char-cursor {
@@ -298,9 +292,8 @@ body {
     width: 2px;
     background: var(--primary);
     border-radius: 2px;
-    transform-origin: center;
     animation: cursorBlink 1.05s ease-in-out infinite;
-    will-change: opacity, transform;
+    will-change: opacity;
   }
 
   /* End-of-word cursor beam */
@@ -351,16 +344,17 @@ body {
 
 /* ===== Keyframes ===== */
 
-/* Per-character entrance animations — the subtle vertical nudge gives
-   the "flowing water" feel of MonkeyType without any layout cost.
-   Uses transform (GPU) + opacity only, never triggers reflow. */
+/* Per-character entrance animations — smooth "flowing water" effect.
+   Uses transform (GPU) + opacity only, never triggers layout reflow.
+   cubic-bezier(0.22,1,0.36,1) is a snappy ease-out-expo feel. */
 @keyframes charCorrect {
-  from { opacity: 0.5; transform: translateY(2px); }
-  to   { opacity: 1;   transform: translateY(0);   }
+  0%   { opacity: 0.4; transform: translateY(3px); }
+  100% { opacity: 1;   transform: translateY(0);   }
 }
 @keyframes charError {
-  from { opacity: 0.6; transform: translateY(-1px) scale(0.97); }
-  to   { opacity: 1;   transform: translateY(0)    scale(1);    }
+  0%   { opacity: 0.5; transform: translateY(-2px) scale(0.96); }
+  60%  { opacity: 1;   transform: translateY(0.5px) scale(1.01); }
+  100% { opacity: 1;   transform: translateY(0)     scale(1);    }
 }
 
 @keyframes cursorBlink {

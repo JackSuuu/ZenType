@@ -87,12 +87,31 @@ const AppContent: React.FC = () => {
       </main>
 
       {/* Footer */}
-      <footer className="py-4 text-center">
+      <footer className="py-4 flex flex-col items-center gap-2">
         <span className="font-mono text-xs" style={{ color: 'var(--subtext)', opacity: 0.3 }}>
           zentype · 無音 · made with
           <span className="mx-1" style={{ color: 'var(--primary)' }}>茶</span>
           and code
         </span>
+        {/* Ctrl+P hint — hidden on mobile (no keyboard) */}
+        <button
+          onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'p', ctrlKey: true }))}
+          className="hidden sm:flex items-center gap-1.5 font-mono text-xs cursor-pointer transition-opacity duration-150 hover:opacity-60"
+          style={{ color: 'var(--subtext)', opacity: 0.25 }}
+          title="Open theme palette"
+        >
+          <kbd
+            className="px-1.5 py-0.5 rounded"
+            style={{
+              background: 'var(--overlay-sm)',
+              border: '1px solid var(--border)',
+              fontSize: '0.65rem',
+            }}
+          >
+            ctrl+p
+          </kbd>
+          <span>themes</span>
+        </button>
       </footer>
 
       {/* Settings Modal */}

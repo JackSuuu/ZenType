@@ -213,14 +213,12 @@ export const TypingArea: React.FC<TypingAreaProps> = ({ viewState, testState, on
         }}
       />
 
-      {/* Use currentLine as key so the word block animates when lines scroll */}
+      {/* Smooth line transition — stays in DOM, uses GPU transform for scroll */}
       <motion.div
-        key={Math.max(0, currentLine - 1)}
-        initial={lineChanged ? { opacity: 0.7, y: 4 } : false}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.1, ease: 'easeOut' }}
+        animate={{ y: lineChanged ? [4, 0] : 0, opacity: lineChanged ? [0.7, 1] : 1 }}
+        transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
+        style={{ willChange: 'transform, opacity', maxHeight: `calc(2.6em * ${VISIBLE_LINES})` }}
         className="flex flex-wrap gap-x-[0.6em] gap-y-0 overflow-hidden"
-        style={{ maxHeight: `calc(2.6em * ${VISIBLE_LINES})` }}
       >
         {visibleSlice.words.map((word, relIdx) => {
           const wordIdx = relIdx + visibleSlice.offset

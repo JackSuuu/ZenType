@@ -115,8 +115,8 @@ export const Home: React.FC = () => {
 
   return (
     <div
-      className="flex-1 flex flex-col items-center justify-center px-3 sm:px-4 py-6 sm:py-8"
-      style={{ position: 'relative' }}
+      className="flex-1 flex flex-col items-center justify-center px-3 sm:px-4"
+      style={{ position: 'relative', minHeight: 'calc(100vh - 140px)', marginTop: '-3rem' }}
     >
       {petals.map((p) => (
         <SakuraPetal key={p.id} style={{ left: `${p.left}%`, top: '-20px' }} />
@@ -139,16 +139,17 @@ export const Home: React.FC = () => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              {/* Mode / config selector — always in DOM, animates in/out without layout shift */}
+              {/* Mode / config selector — always in DOM, GPU-only hide/show.
+                  Uses scaleY+opacity (GPU composited) instead of maxHeight (layout reflow). */}
               <motion.div
                 animate={testState === 'idle'
-                  ? { opacity: 1, y: 0, maxHeight: 200, pointerEvents: 'auto' }
-                  : { opacity: 0, y: -8, maxHeight: 0, pointerEvents: 'none' }
+                  ? { opacity: 1, y: 0, scale: 1, pointerEvents: 'auto' as const }
+                  : { opacity: 0, y: -6, scale: 0.97, pointerEvents: 'none' as const }
                 }
                 initial={false}
-                transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
-                style={{ overflow: 'hidden' }}
-                className="flex flex-col items-center gap-4 mb-8"
+                transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+                style={{ transformOrigin: 'top center', willChange: 'transform, opacity' }}
+                className="flex flex-col items-center gap-2"
               >
                 <Tabs
                   tabs={MODE_TABS}
@@ -197,27 +198,26 @@ export const Home: React.FC = () => {
 
               {/* Typing area */}
               <div
-                className="relative px-1 sm:px-2 py-5 sm:py-6 cursor-text"
-                style={{ minHeight: '168px' }}
+                className="relative px-1 sm:px-2 py-3 sm:py-4 cursor-text"
+                style={{ minHeight: '148px' }}
               >
                 <TypingArea viewState={viewState} testState={testState} onMobileKey={handleMobileKey} />
               </div>
 
-              {/* Tab hint */}
-              <AnimatePresence>
-                {testState === 'running' && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="text-center mt-3"
-                  >
-                    <span className="font-mono text-xs" style={{ color: 'var(--subtext)', opacity: 0.35 }}>
-                      tab to restart
-                    </span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {/* Tab hint — always in DOM, GPU-only fade */}
+              <motion.div
+                animate={testState === 'running'
+                  ? { opacity: 1, pointerEvents: 'auto' as const }
+                  : { opacity: 0, pointerEvents: 'none' as const }
+                }
+                initial={false}
+                transition={{ duration: 0.15 }}
+                className="text-center mt-3"
+              >
+                <span className="font-mono text-xs" style={{ color: 'var(--subtext)', opacity: 0.35 }}>
+                  tab to restart
+                </span>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>

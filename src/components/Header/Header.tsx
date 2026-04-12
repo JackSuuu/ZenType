@@ -123,9 +123,9 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
             </div>
           )}
 
-          {/* Theme dots — desktop only */}
+          {/* Theme dots + palette shortcut — desktop only */}
           <div className="hidden sm:flex items-center gap-2">
-            {THEMES.map((t) => (
+            {THEMES.slice(0, 5).map((t) => (
               <button
                 key={t.name}
                 onClick={() => setTheme(t.name)}
@@ -137,6 +137,15 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
                 style={{ background: t.colors.primary }}
               />
             ))}
+            {/* "more themes" button — opens Ctrl+P palette */}
+            <button
+              onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'p', ctrlKey: true }))}
+              title="All themes (Ctrl+P)"
+              className="w-3.5 h-3.5 rounded-full flex items-center justify-center cursor-pointer opacity-40 hover:opacity-80 transition-opacity duration-150"
+              style={{ border: '1px dashed var(--subtext)' }}
+            >
+              <span className="font-mono leading-none" style={{ fontSize: '8px', color: 'var(--subtext)' }}>+</span>
+            </button>
           </div>
 
           {/* GitHub link — desktop only */}

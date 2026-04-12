@@ -92,9 +92,9 @@ export const ThemePalette: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
+            transition={{ duration: 0.12 }}
             className="fixed inset-0 z-50"
-            style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(6px)' }}
+            style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
             onClick={close}
           />
 
@@ -102,10 +102,10 @@ export const ThemePalette: React.FC = () => {
           <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] pointer-events-none px-4">
             <motion.div
               key="palette-panel"
-              initial={{ opacity: 0, y: -12, scale: 0.97 }}
+              initial={{ opacity: 0, y: -16, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -8, scale: 0.97 }}
-              transition={{ duration: 0.18, ease: [0.2, 0, 0, 1] }}
+              exit={{ opacity: 0, y: -10, scale: 0.97 }}
+              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
               className="pointer-events-auto w-full max-w-sm"
               style={{
                 background: 'var(--surface)',
