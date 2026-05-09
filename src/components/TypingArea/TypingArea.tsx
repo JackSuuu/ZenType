@@ -7,7 +7,6 @@ import clsx from 'clsx'
 interface TypingAreaProps {
   viewState: TypingViewState
   testState: string
-  /** Called when the hidden input fires a key — used by mobile to drive the engine */
   onMobileKey?: (key: string) => void
 }
 
@@ -37,12 +36,13 @@ const WordSpan = React.memo(function WordSpan({
   blindMode: boolean
   renderTick: number
 }) {
-  // Extra chars typed beyond word length
   const extraTyped = isCurrentWord ? typedWord.slice(word.original.length) : ''
+  const atEnd = isCurrentWord && typedWord.length >= word.original.length
 
   return (
     <span className="relative inline-block">
       {word.chars.map((charData, charIdx) => {
+        // Mark current char with data attribute — caret div reads this to position itself
         const isCurrentChar = isCurrentWord && charIdx === typedWord.length
 
         let statusClass = 'char-pending'
@@ -57,29 +57,25 @@ const WordSpan = React.memo(function WordSpan({
         return (
           <span
             key={charIdx}
-            // data-tick forces the browser to restart the CSS animation each time
-            // this char's status changes — without it, going pending→correct→pending→correct
-            // wouldn't re-trigger the charCorrect keyframe the second time.
             data-tick={statusClass !== 'char-pending' ? renderTick : undefined}
-            className={clsx(statusClass, isCurrentChar && 'char-cursor')}
+            data-char-cursor={isCurrentChar ? '' : undefined}
+            className={statusClass}
           >
             {charData.char}
           </span>
         )
       })}
 
-      {/* Extra typed characters — only visible when isCurrentWord */}
+      {/* Extra typed chars beyond word length */}
       {extraTyped && (
         <span className="char-extra" data-tick={renderTick}>{extraTyped}</span>
       )}
 
-      {/* Cursor beam at end of word */}
+      {/* 0-width anchor at end of word — caret sits here when word is fully typed */}
       <span
-        className="char-cursor-beam"
-        style={{
-          opacity: isCurrentWord && typedWord.length >= word.original.length ? 1 : 0,
-          width: 0,
-        }}
+        data-char-cursor={atEnd ? '' : undefined}
+        style={{ display: 'inline-block', width: 0, overflow: 'visible' }}
+        aria-hidden="true"
       />
     </span>
   )
@@ -89,11 +85,11 @@ export const TypingArea: React.FC<TypingAreaProps> = ({ viewState, testState, on
   const { blindMode, fontSize } = useSettingsStore()
   const { words, currentWordIndex, typedWord, renderTick } = viewState
 
-  // Hidden input ref for mobile virtual keyboard
   const hiddenInputRef = useRef<HTMLInputElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
+  const caretRef = useRef<HTMLDivElement>(null)
 
-  // Track which display-line we're on to animate when it scrolls
+  // Track line for scroll animation
   const currentLine = Math.floor(currentWordIndex / WORDS_PER_LINE)
   const prevLineRef = useRef(currentLine)
   const lineChanged = currentLine !== prevLineRef.current
@@ -107,20 +103,38 @@ export const TypingArea: React.FC<TypingAreaProps> = ({ viewState, testState, on
     return { words: words.slice(startIdx, endIdx), offset: startIdx }
   }, [words, currentLine])
 
-  // Keep hidden input focused whenever the test is active or idle
+  // Focus hidden input
   const focusInput = useCallback(() => {
     hiddenInputRef.current?.focus({ preventScroll: true })
   }, [])
 
-  // Auto-focus on mount and state changes
   useEffect(() => {
-    if (testState !== 'finished') {
-      focusInput()
-    }
+    if (testState !== 'finished') focusInput()
   }, [testState, focusInput])
 
-  // Handle mobile input events: map `input` events → synthetic key presses
-  // This fires from the virtual keyboard's composition input
+  // ── Smooth sliding caret ──────────────────────────────────────────────────
+  // After every state update, find the [data-char-cursor] element and move the
+  // caret div to its position using CSS transition — gives a smooth slide.
+  useEffect(() => {
+    const wrapper = wrapperRef.current
+    const caret = caretRef.current
+    if (!wrapper || !caret) return
+
+    const cursorEl = wrapper.querySelector('[data-char-cursor]') as HTMLElement | null
+    if (!cursorEl) return
+
+    const wRect = wrapper.getBoundingClientRect()
+    const cRect = cursorEl.getBoundingClientRect()
+
+    const left = cRect.left - wRect.left
+    const top  = cRect.top  - wRect.top
+
+    caret.style.left   = `${left}px`
+    caret.style.top    = `${top + cRect.height * 0.08}px`
+    caret.style.height = `${cRect.height * 0.84}px`
+  }, [renderTick, currentWordIndex, typedWord])
+
+  // Mobile input handling
   const lastValueRef = useRef('')
   const handleInput = useCallback((e: React.FormEvent<HTMLInputElement>) => {
     const input = e.currentTarget
@@ -128,23 +142,15 @@ export const TypingArea: React.FC<TypingAreaProps> = ({ viewState, testState, on
     const old = lastValueRef.current
 
     if (newValue.length > old.length) {
-      // Characters added
       const added = newValue.slice(old.length)
-      for (const ch of added) {
-        onMobileKey?.(ch)
-      }
+      for (const ch of added) onMobileKey?.(ch)
     } else if (newValue.length < old.length) {
-      // Backspace(s)
       const deletedCount = old.length - newValue.length
-      for (let i = 0; i < deletedCount; i++) {
-        onMobileKey?.('Backspace')
-      }
+      for (let i = 0; i < deletedCount; i++) onMobileKey?.('Backspace')
     }
 
     lastValueRef.current = newValue
 
-    // Keep input value short to prevent it growing unbounded.
-    // We reset to a stable sentinel after every word (space) is processed.
     if (newValue.includes(' ')) {
       onMobileKey?.(' ')
       input.value = ''
@@ -152,13 +158,8 @@ export const TypingArea: React.FC<TypingAreaProps> = ({ viewState, testState, on
     }
   }, [onMobileKey])
 
-  // Also handle keydown for physical keyboards (already handled by global listener,
-  // but we still call preventDefault to avoid the input value growing visibly).
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Space and Enter on mobile: treat space as word-advance
-    if (e.key === ' ' || e.key === 'Enter') {
-      e.preventDefault()
-    }
+    if (e.key === ' ' || e.key === 'Enter') e.preventDefault()
   }, [])
 
   if (words.length === 0) return null
@@ -167,23 +168,15 @@ export const TypingArea: React.FC<TypingAreaProps> = ({ viewState, testState, on
     <div
       ref={wrapperRef}
       className={clsx(
-        'relative font-mono select-none',
+        'relative font-mono select-none cursor-text',
         FONT_SIZE_MAP[fontSize],
         LINE_HEIGHT,
-        // Make the whole area tappable on mobile to focus the hidden input
-        'cursor-text',
       )}
       style={{ color: 'var(--subtext)' }}
       onClick={focusInput}
       onTouchStart={focusInput}
     >
-      {/*
-        Hidden input — kept in the DOM always so iOS/Android can show the virtual
-        keyboard.  It's visually invisible (opacity:0, size 1px) but positioned
-        inside the typing area so the keyboard appears near the words on scroll.
-        `inputMode="text"` keeps the full QWERTY keyboard open on mobile.
-        `autocorrect="off"` / `autocapitalize="none"` prevent iOS from mangling input.
-      */}
+      {/* Hidden input for mobile virtual keyboard */}
       <input
         ref={hiddenInputRef}
         type="text"
@@ -208,15 +201,37 @@ export const TypingArea: React.FC<TypingAreaProps> = ({ viewState, testState, on
           background: 'transparent',
           color: 'transparent',
           caretColor: 'transparent',
-          fontSize: '16px', // prevent iOS zoom-in on focus
+          fontSize: '16px',
           zIndex: -1,
         }}
       />
 
-      {/* Smooth line transition — stays in DOM, uses GPU transform for scroll */}
+      {/* Smooth sliding caret — one GPU-composited element, transitions left/top */}
+      <div
+        ref={caretRef}
+        className="char-caret"
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          width: '2px',
+          top: 0,
+          left: 0,
+          background: 'var(--primary)',
+          borderRadius: '2px',
+          pointerEvents: 'none',
+          // Slide to new position on keystroke; cross-line jump is instant (top transition
+          // is intentionally shorter so it snaps on line change, not slides awkwardly)
+          transition: 'left 60ms cubic-bezier(0.25,0.1,0.25,1), top 40ms step-end, height 40ms step-end',
+          animation: 'cursorBlink 1.05s ease-in-out infinite',
+          willChange: 'left, top',
+          zIndex: 10,
+        }}
+      />
+
+      {/* Word rows — smooth line scroll */}
       <motion.div
-        animate={{ y: lineChanged ? [4, 0] : 0, opacity: lineChanged ? [0.7, 1] : 1 }}
-        transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
+        animate={{ y: lineChanged ? [4, 0] : 0, opacity: lineChanged ? [0.75, 1] : 1 }}
+        transition={{ duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
         style={{ willChange: 'transform, opacity', maxHeight: `calc(2.6em * ${VISIBLE_LINES})` }}
         className="flex flex-wrap gap-x-[0.6em] gap-y-0 overflow-hidden"
       >
@@ -242,10 +257,7 @@ export const TypingArea: React.FC<TypingAreaProps> = ({ viewState, testState, on
       {/* Idle hint */}
       {testState === 'idle' && words.length > 0 && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span
-            className="font-mono text-sm"
-            style={{ color: 'var(--subtext)', opacity: 0.4 }}
-          >
+          <span className="font-mono text-sm" style={{ color: 'var(--subtext)', opacity: 0.4 }}>
             tap or start typing...
           </span>
         </div>

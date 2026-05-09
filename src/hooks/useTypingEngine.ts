@@ -107,11 +107,12 @@ export function useTypingEngine() {
 
       if (key === ' ') {
         const typed = typedWordRef.current
+        // Only allow space to advance after typing at least the full word length
         if (typed.length === 0) return
-
         const idx = currentWordIndexRef.current
         const words = wordsRef.current
         const word = words[idx]
+        if (typed.length < word.original.length) return
         const wordCorrect = typed === word.original
 
         play(wordCorrect ? 'space' : 'error')

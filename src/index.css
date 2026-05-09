@@ -255,15 +255,13 @@ body {
     color: var(--text);
   }
 
-  /* Typing characters — instant color swap (no transition) for snappy feel.
-     Animations use GPU-only properties (transform + opacity).
-     Avoid will-change on every char — hundreds of promoted layers kills perf. */
+  /* Typing characters */
   .char-pending {
     color: var(--subtext);
   }
   .char-correct {
     color: var(--correct, var(--text));
-    animation: charCorrect 0.18s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation: charCorrect 0.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
   .char-error {
     color: var(--error);
@@ -271,48 +269,17 @@ body {
     text-decoration-color: var(--error);
     text-underline-offset: 3px;
     text-decoration-thickness: 1px;
-    animation: charError 0.16s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation: charError 0.18s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
   .char-extra {
     color: var(--error);
     opacity: 0.6;
-    animation: charError 0.16s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation: charError 0.18s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
 
-  .char-cursor {
-    position: relative;
-  }
-  /* Caret uses transform for GPU-accelerated blink — no layout reflow */
-  .char-cursor::before {
-    content: '';
-    position: absolute;
-    left: -1px;
-    top: 8%;
-    bottom: 8%;
-    width: 2px;
-    background: var(--primary);
-    border-radius: 2px;
-    animation: cursorBlink 1.05s ease-in-out infinite;
-    will-change: opacity;
-  }
-
-  /* End-of-word cursor beam */
-  .char-cursor-beam {
-    position: relative;
-    display: inline;
-    transition: opacity 0.06s ease;
-  }
-  .char-cursor-beam::before {
-    content: '';
-    position: absolute;
-    left: -1px;
-    top: 8%;
-    bottom: 8%;
-    width: 2px;
-    background: var(--primary);
-    border-radius: 2px;
-    animation: cursorBlink 1.05s ease-in-out infinite;
-    will-change: opacity;
+  /* Sliding caret — single GPU-composited div, positioned via JS getBoundingClientRect */
+  .char-caret {
+    will-change: left, top;
   }
 
   /* Stats */
@@ -344,17 +311,18 @@ body {
 
 /* ===== Keyframes ===== */
 
-/* Per-character entrance animations — smooth "flowing water" effect.
-   Uses transform (GPU) + opacity only, never triggers layout reflow.
-   cubic-bezier(0.22,1,0.36,1) is a snappy ease-out-expo feel. */
+/* Per-character animations — GPU-only (transform + opacity).
+   charCorrect: drop-in with subtle scale punch for a "solid" feel.
+   charError: quick upward recoil + shake. */
 @keyframes charCorrect {
-  0%   { opacity: 0.4; transform: translateY(3px); }
-  100% { opacity: 1;   transform: translateY(0);   }
+  0%   { opacity: 0.3; transform: translateY(4px) scale(0.95); }
+  60%  { opacity: 1;   transform: translateY(-1px) scale(1.03); }
+  100% { opacity: 1;   transform: translateY(0) scale(1); }
 }
 @keyframes charError {
-  0%   { opacity: 0.5; transform: translateY(-2px) scale(0.96); }
-  60%  { opacity: 1;   transform: translateY(0.5px) scale(1.01); }
-  100% { opacity: 1;   transform: translateY(0)     scale(1);    }
+  0%   { opacity: 0.5; transform: translateY(-3px) scale(0.94); }
+  50%  { opacity: 1;   transform: translateY(1px) scale(1.02); }
+  100% { opacity: 1;   transform: translateY(0) scale(1); }
 }
 
 @keyframes cursorBlink {
@@ -389,17 +357,11 @@ body {
   100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
 }
 
-/* Neon/Aurora/Candy cursor glow — active when caret is on a bright-theme char */
-[data-theme='neon'] .char-cursor::before,
-[data-theme='aurora'] .char-cursor::before,
-[data-theme='candy'] .char-cursor::before {
-  box-shadow: 0 0 6px 1px var(--primary);
-  animation: cursorBlinkSmooth 1.05s ease-in-out infinite;
-}
-[data-theme='neon'] .char-cursor-beam::before,
-[data-theme='aurora'] .char-cursor-beam::before,
-[data-theme='candy'] .char-cursor-beam::before {
-  box-shadow: 0 0 6px 1px var(--primary);
+/* Neon/Aurora/Candy — glow on the sliding caret div */
+[data-theme='neon'] .char-caret,
+[data-theme='aurora'] .char-caret,
+[data-theme='candy'] .char-caret {
+  box-shadow: 0 0 8px 2px var(--primary);
   animation: cursorBlinkSmooth 1.05s ease-in-out infinite;
 }
 
